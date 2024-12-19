@@ -1,0 +1,110 @@
+!pip install freegames
+from turtle import *
+from random import randrange
+from freegames import square,vector
+  
+# Initial positions
+boy = vector(0, -150)  # Position of the boy
+basket_width = 40      # Width of the basket (just for reference)
+ball = vector(0, 100)  # Position of the falling ball
+ball_radius = 10       # Ball radius
+speed = 5              # Speed of the ball falling
+score = 0              # Player's score
+
+# Move boy's basket
+def change(x, y):
+    "Move the basket"
+    boy.x = x
+
+def inside(head):
+    "Check if the boy is within screen bounds."
+    return -190 < head.x < 190
+
+def draw_person():
+    """Draw the person instead of a box."""
+    penup()
+    goto(boy.x, boy.y)
+    pendown()
+    # Draw head
+    penup()
+    goto(boy.x, boy.y + 20)  # Move to the head position
+    pendown()
+    circle(10)  # Head
+
+    # Draw body
+    penup()
+    goto(boy.x, boy.y + 20)  # Start from the neck
+    pendown()
+    setheading(270)  # Point the pen downward
+    forward(40)  # Body
+
+    # Draw legs
+    penup()
+    goto(boy.x, boy.y - 20)  # Starting point for legs
+    pendown()
+    setheading(45)  # Diagonal leg
+    forward(30)
+    penup()
+    goto(boy.x, boy.y - 20)
+    pendown()
+    setheading(135)  # Other diagonal leg
+    forward(30)
+
+    # Draw arms
+    penup()
+    goto(boy.x, boy.y + 10)  # Starting point for arms
+    pendown()
+    setheading(0)  # Horizontal arms
+    forward(40)
+
+def move():
+    global score
+    "Move ball and check for collision."
+    ball.y -= speed  # Ball falls down
+
+    # Check if the ball hits the person (the basket)
+    if boy.y < ball.y < boy.y + basket_width and abs(boy.x - ball.x) < basket_width / 2:
+        score += 1  # Increment score if the ball is caught
+        print('Score:', score)
+        ball.x = randrange(-180, 180, 10)  # Random new position for the ball
+        ball.y = 100  # Reset ball to top of screen
+
+    if ball.y < -200:  # Ball falls off the screen
+        print("Game Over! Final Score:", score)
+        return
+
+    # Redraw everything
+    clear()
+    draw_person()  # Draw the person instead of the basket
+    penup()
+    goto(ball.x, ball.y)  # Move the pen to the ball position
+    pendown()
+    begin_fill()
+    circle(ball_radius)  # Draw the ball
+    end_fill()
+
+    update()
+
+    # Repeat the movement every 100 ms
+    ontimer(move, 100)
+
+# Setup the screen
+setup(420, 420, 370, 0)
+hideturtle()
+tracer(False)
+listen()
+
+# Key press events for moving the person
+def move_basket_right():
+    if boy.x + basket_width / 2 < 200:  # Prevent the person from going off the right side
+        change(boy.x + 10, boy.y)
+
+def move_basket_left():
+    if boy.x - basket_width / 2 > -200:  # Prevent the person from going off the left side
+        change(boy.x - 10, boy.y)
+
+onkey(move_basket_right, 'Right')  # Move person to the right
+onkey(move_basket_left, 'Left')  # Move person to the left
+
+move()
+done()
